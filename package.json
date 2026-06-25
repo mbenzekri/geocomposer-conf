@@ -2,7 +2,7 @@
     "name": "geo-composer-config",
     "private": true,
     "config": {
-        "geocRelease": "https://github.com/mbenzekri/geocomposer/releases/download/v1.0.0"
+        "geocRelease": "https://github.com/mbenzekri/geocomposer/releases/download/v1.0.1"
     },
     "scripts": {
         "postinstall": "curl -fsSL \"$npm_package_config_geocRelease/config.schema.json\" -o config.schema.json && curl -fsSL \"$npm_package_config_geocRelease/dynstyle.schema.json\" -o dynstyle.schema.json",
