@@ -1,455 +1,139 @@
 {
-    "$schema": "./config.schema.json",
+    "$schema": "./schemas/config.schema.json",
     "$defs": {
-        "cnx-postgis": "postgres://postgres:$s{GEOC_PGPWD|postgres}@$s{GEOC_POSTGIS_HOST|localhost}:5432/postgres",
-        "cnx-oracle": "oracle://GEOCOMPOSER:geocomposer@$s{GEOC_ORACLE_HOST|localhost}:1521/XEPDB1",
-        "worldExtent": [
+        "paysExtent": [
             -180,
             -90,
             180,
             90
         ],
-        "defaultLayer": {
-            "crs": "EPSG:4326",
-            "extent": "#/$defs/worldExtent",
-            "style": "world",
-            "pointProperties": [
-                {
-                    "x": "label_x",
-                    "y": "label_y",
-                    "crs": "EPSG:4326"
-                }
-            ]
-        },
         "defaultTileset": {
             "tileMatrixSet": "WebMercatorQuad",
             "formats": [
                 "image/png",
-                "application/geo+json",
-                "application/vnd.mapbox-vector-tile"
+                "application/geo+json"
             ],
             "minZoom": 0,
-            "maxZoom": 8,
-            "cacheControl": "public, max-age=3600",
-            "vector": {
-                "extent": 4096,
-                "buffer": 64,
-                "generalization": {
-                    "tolerance": 0.75
-                },
-                "geojsonPrecision": 3
-            }
-        },
-        "tilesetList": [
-                "world",
-                "world-capitals",
-                "world-mem",
-                "world-mem-capitals",
-                "world-gml",
-                "world-gml-capitals",
-                "world-shp",
-                "world-shp-capitals",
-                "world-gpkg",
-                "world-gpkg-capitals",
-                "world-postgis",
-                "world-postgis-capitals",
-                "world-oracle",
-                "world-oracle-capitals"
-            ]
+            "maxZoom": 6
+        }
     },
     "server": {
-        "port": "$i{GEOC_PORT|3000}",
-        "logLevel": "$s{GEOC_LOGLEVEL|LOG}"
+        "port": "$i{PORT|3000}",
+        "logLevel": "DEBUG"
     },
     "services": {
         "wms": {
             "path": "/wms",
-            "title": "GeoComposer WMS",
-            "abstract": "Minimal WMS server backed by the GeoComposer render pipeline.",
+            "title": "WMS PARIS",
+            "abstract": "Paris/France WMS service.",
             "onlineResource": "http://localhost:3000/wms",
-            "maxWidth": 4096,
-            "maxHeight": 4096
-        },
-        "api": {
-            "path": "/ogc",
-            "title": "GeoComposer OGC API Features",
-            "abstract": "Feature API backed by GeoComposer layers.",
-            "onlineResource": "http://localhost:3000/api",
-            "defaultLimit": 100,
-            "maxLimit": 10000,
-            "supportedCrs": [
-                "EPSG:4326",
-                "EPSG:3857"
-            ]
+            "maxWidth": 2048,
+            "maxHeight": 2048
         },
         "xyz": {
             "path": "/tiles",
             "maxScaleFactor": 4,
-            "cache": "../cache/xyz",
-            "tilesets": "#/$defs/tilesetList" 
+            "tilesets": [
+                "pays"
+            ]
         },
         "wmts": {
             "path": "/wmts",
             "title": "GeoComposer WMTS",
-            "abstract": "WMTS service backed by GeoComposer tilesets.",
+            "abstract": "GeoComposer WMTS service.",
             "onlineResource": "http://localhost:3000/wmts",
-            "cache": "../cache/wmts",
-            "tilesets": "#/$defs/tilesetList" 
+            "tilesets": [
+                "pays"
+            ]
         }
     },
     "tilesets": {
-        "world": {
+        "pays": {
             "$ref": "#/$defs/defaultTileset",
-            "title": "World",
-            "abstract": "Tiles for world country boundaries from the GeoJSON source.",
+            "title": "Pays",
+            "abstract": "Minimal template tileset.",
             "layers": [
                 {
-                    "layer": "world",
-                    "style": "world"
+                    "layer": "pays",
+                    "style": "pays"
                 }
             ]
+        }
+    },
+    "sources": {
+        "parcelle": {
+            "type": "shp",
+            "title": "Parcelles",
+            "abstract": "Limites de parcelles.",
+            "shpPath": "data/parcelles.shp",
+            "dbfPath": "data/parcelles.dbf",
+            "indexes": true
         },
-        "world-capitals": {
-            "$ref": "#/$defs/defaultTileset",
-            "title": "World and Capitals",
-            "abstract": "Tiles combining GeoJSON country boundaries and capital city labels.",
-            "layers": [
-                {
-                    "layer": "world",
-                    "style": "world"
-                },
-                {
-                    "layer": "capitals",
-                    "style": "capitals"
-                }
-            ]
+        "pays": {
+            "type": "geojson",
+            "title": "Pays",
+            "abstract": "Délimitations des Pays (▱).",
+            "path": "data/pays.geojson",
+            "indexes": true
         },
-        "world-mem": {
-            "$ref": "#/$defs/defaultTileset",
-            "title": "World Memory",
-            "abstract": "Tiles for world country boundaries from the memory source.",
-            "layers": [
-                {
-                    "layer": "world-mem",
-                    "style": "world"
-                }
-            ]
+        "batiment": {
+            "type": "geojson",
+            "title": "Bâtiments",
+            "abstract": "Limites de bâtiments.",
+            "path": "data/cadastre-75-batiments.json",
+            "indexes": true
+        }
+    },
+    "styles": {
+        "pays": {
+            "type": "dynamic",
+            "path": "styles/pays.json"
         },
-        "world-mem-capitals": {
-            "$ref": "#/$defs/defaultTileset",
-            "title": "World Memory and Capitals",
-            "abstract": "Tiles combining memory-backed country boundaries and capital city labels.",
-            "layers": [
-                {
-                    "layer": "world-mem",
-                    "style": "world"
-                },
-                {
-                    "layer": "capitals",
-                    "style": "capitals"
-                }
-            ]
+        "parcelle": {
+            "type": "dynamic",
+            "path": "styles/parcelle.json"
         },
-        "world-gml": {
-            "$ref": "#/$defs/defaultTileset",
-            "title": "World GML",
-            "abstract": "Tiles for world country boundaries from the GML source.",
-            "layers": [
-                {
-                    "layer": "world-gml",
-                    "style": "world"
-                }
-            ]
+        "batiment": {
+            "type": "dynamic",
+            "path": "styles/batiment.json"
+        }
+    },
+    "layers": {
+        "pays": {
+            "title": "Pays",
+            "abstract": "Frontières des pays.",
+            "source": "pays",
+            "crs": "EPSG:4326",
+            "extent": "#/$defs/paysExtent",
+            "style": "pays"
         },
-        "world-gml-capitals": {
-            "$ref": "#/$defs/defaultTileset",
-            "title": "World GML and Capitals",
-            "abstract": "Tiles combining GML country boundaries and capital city labels.",
-            "layers": [
-                {
-                    "layer": "world-gml",
-                    "style": "world"
-                },
-                {
-                    "layer": "capitals",
-                    "style": "capitals"
-                }
-            ]
+        "parcelle": {
+            "title": "Parcelles",
+            "abstract": "Limites de parcelles.",
+            "source": "parcelle",
+            "crs": "EPSG:2154",
+            "extent": "#/$defs/paysExtent",
+            "style": "parcelle"
         },
-        "world-shp": {
-            "$ref": "#/$defs/defaultTileset",
-            "title": "World Shapefile",
-            "abstract": "Tiles for world country boundaries from the shapefile source.",
-            "layers": [
-                {
-                    "layer": "world-shp",
-                    "style": "world"
-                }
-            ]
-        },
-        "world-shp-capitals": {
-            "$ref": "#/$defs/defaultTileset",
-            "title": "World Shapefile and Capitals",
-            "abstract": "Tiles combining shapefile country boundaries and capital city labels.",
-            "layers": [
-                {
-                    "layer": "world-shp",
-                    "style": "world"
-                },
-                {
-                    "layer": "capitals",
-                    "style": "capitals"
-                }
-            ]
-        },
-        "world-gpkg": {
-            "$ref": "#/$defs/defaultTileset",
-            "title": "World GeoPackage",
-            "abstract": "Tiles for world country boundaries from the GeoPackage source.",
-            "layers": [
-                {
-                    "layer": "world-gpkg",
-                    "style": "world"
-                }
-            ]
-        },
-        "world-gpkg-capitals": {
-            "$ref": "#/$defs/defaultTileset",
-            "title": "World GeoPackage and Capitals",
-            "abstract": "Tiles combining GeoPackage country boundaries and capital city labels.",
-            "layers": [
-                {
-                    "layer": "world-gpkg",
-                    "style": "world"
-                },
-                {
-                    "layer": "capitals",
-                    "style": "capitals"
-                }
-            ]
-        },
-        "world-postgis": {
-            "$ref": "#/$defs/defaultTileset",
-            "title": "World PostGIS",
-            "abstract": "Tiles for world country boundaries from the PostGIS source.",
-            "layers": [
-                {
-                    "layer": "world-postgis",
-                    "style": "world"
-                }
-            ]
-        },
-        "world-postgis-capitals": {
-            "$ref": "#/$defs/defaultTileset",
-            "title": "World PostGIS and Capitals",
-            "abstract": "Tiles combining PostGIS country boundaries and capital city labels.",
-            "layers": [
-                {
-                    "layer": "world-postgis",
-                    "style": "world"
-                },
-                {
-                    "layer": "capitals",
-                    "style": "capitals"
-                }
-            ]
-        },
-        "world-oracle": {
-            "$ref": "#/$defs/defaultTileset",
-            "title": "World Oracle",
-            "abstract": "Tiles for world country boundaries from the Oracle source.",
-            "layers": [
-                {
-                    "layer": "world-oracle",
-                    "style": "world"
-                }
-            ]
-        },
-        "world-oracle-capitals": {
-            "$ref": "#/$defs/defaultTileset",
-            "title": "World Oracle and Capitals",
-            "abstract": "Tiles combining Oracle country boundaries and capital city labels.",
-            "layers": [
-                {
-                    "layer": "world-oracle",
-                    "style": "world"
-                },
-                {
-                    "layer": "capitals",
-                    "style": "capitals"
-                }
-            ]
+        "batiment": {
+            "title": "Bâtiments",
+            "abstract": "Limites de bâtiments.",
+            "source": "batiment",
+            "crs": "EPSG:2154",
+            "extent": "#/$defs/paysExtent",
+            "style": "batiment"
         }
     },
     "crs": {
         "EPSG:4326": {
-            "title": "WGS 84 - WGS84 - World Geodetic System 1984, used in GPS"
+            "title": "WGS84 pays geodetic coord sys"
         },
         "EPSG:3857": {
-            "title": "WGS 84 / Pseudo-Mercator - Spherical Mercator, Google Maps, OpenStreetMap, Bing, ArcGIS, ESRI"
+            "title": "Web Mercator (standard Google, ...)"
         },
-        "EPSG:2154" :{
+        "EPSG:2154": {
             "title": "RGF93 / Lambert-93",
             "proj4": "+proj=lcc +lat_0=46.5 +lon_0=3 +lat_1=49 +lat_2=44 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs +type=crs"
-        }
-    },
-    "sources": {
-        "world": {
-            "type": "geojson",
-            "title": "World GeoJSON",
-            "abstract": "World country boundaries GeoJSON demo source.",
-            "path": "../data/world.geojson"
-        },
-        "capitals": {
-            "type": "geojson",
-            "title": "Capitals GeoJSON",
-            "abstract": "World capitals GeoJSON demo source.",
-            "path": "../data/capitals.geojson"
-        },
-        "world-gml": {
-            "type": "gml",
-            "title": "World GML",
-            "abstract": "World country boundaries GML demo source.",
-            "path": "../data/world.gml",
-            "axisOrder": "auto"
-        },
-        "world-shp": {
-            "type": "shp",
-            "title": "World Shapefile",
-            "abstract": "World country boundaries shapefile demo source.",
-            "shpPath": "../data/shapefile/world.shp",
-            "dbfPath": "../data/shapefile/world.dbf"
-        },
-        "world-gpkg": {
-            "type": "gpkg",
-            "title": "World GeoPackage",
-            "abstract": "World country boundaries GeoPackage demo source.",
-            "path": "../data/world.gpkg",
-            "datasets": {
-                "world": {
-                    "tableName": "world",
-                    "geometryColumn": "geom"
-                }
-            }
-        },
-        "world-postgis": {
-            "type": "postgis",
-            "title": "World PostGIS",
-            "abstract": "World country boundaries PostGIS demo source.",
-            "connection": "#/$defs/cnx-postgis",
-            "schema": "public",
-            "datasets": {
-                "world": {
-                    "tableName": "world",
-                    "geometryColumn": "wkb_geometry",
-                    "primaryKey": "ogc_fid",
-                    "srid": 4326
-                }
-            },
-            "batchSize": 500,
-            "extentStrategy": "estimated"
-        },
-        "world-oracle": {
-            "type": "oracle",
-            "title": "World Oracle",
-            "abstract": "World country boundaries Oracle demo source.",
-            "connection": {
-                "connectionString": "#/$defs/cnx-oracle",
-                "poolMin": 0,
-                "poolMax": 4,
-                "queueTimeout": 30000,
-                "callTimeout": 30000
-            },
-            "schema": "$s{GEOC_ORACLE_SCHEMA|GEOCOMPOSER}",
-            "datasets": {
-                "world": {
-                    "tableName": "WORLD",
-                    "geometryColumn": "GEOM",
-                    "primaryKey": "ID",
-                    "srid": 4326
-                }
-            },
-            "batchSize": 500,
-            "extentStrategy": "metadata"
-        }
-    },
-    "styles": {
-        "world": {
-            "type": "dynamic",
-            "title": "World",
-            "abstract": "Country boundaries rendered from a DynStyle JSON file.",
-            "path": "styles/world.json"
-        },
-        "capitals": {
-            "type": "dynamic",
-            "title": "Capitals",
-            "abstract": "Capital city points and labels rendered from a DynStyle JSON file.",
-            "path": "styles/capitals.json",
-            "options": {
-                "units": "dd"
-            }
-        }
-    },
-    "layers": {
-        "capitals": {
-            "title": "Capitals GeoJSON",
-            "abstract": "World capitals from the GeoJSON demo dataset.",
-            "source": "capitals",
-            "crs": "EPSG:4326",
-            "extent": "#/$defs/worldExtent",
-            "style": "capitals"
-        },
-        "world": {
-            "$ref": "#/$defs/defaultLayer",
-            "title": "World GeoJSON",
-            "abstract": "World country boundaries from the GeoJSON demo dataset.",
-            "source": "world",
-            "style": "world"
-        },
-        "world-mem": {
-            "title": "World Memory",
-            "abstract": "World country boundaries loaded in memory from the GeoJSON demo dataset.",
-            "layer": "world"
-        },
-        "world-gml": {
-            "$ref": "#/$defs/defaultLayer",
-            "title": "World GML",
-            "abstract": "World country boundaries from the GML demo dataset.",
-            "source": "world-gml"
-        },
-        "world-shp": {
-            "$ref": "#/$defs/defaultLayer",
-            "title": "World Shapefile",
-            "abstract": "World country boundaries from the shapefile demo dataset.",
-            "source": "world-shp"
-        },
-        "world-gpkg": {
-            "$ref": "#/$defs/defaultLayer",
-            "title": "World GeoPackage",
-            "abstract": "World country boundaries from the GeoPackage demo dataset.",
-            "source": "world-gpkg",
-            "dataset": "world"
-        },
-        "world-postgis": {
-            "$ref": "#/$defs/defaultLayer",
-            "title": "World PostGIS",
-            "abstract": "World country boundaries from the PostGIS demo dataset.",
-            "source": "world-postgis",
-            "dataset": "world"
-        },
-        "world-oracle": {
-            "$ref": "#/$defs/defaultLayer",
-            "title": "World Oracle",
-            "abstract": "World country boundaries from the Oracle demo dataset.",
-            "source": "world-oracle",
-            "dataset": "world",
-            "pointProperties": [
-                {
-                    "x": "LABEL_X",
-                    "y": "LABEL_Y",
-                    "crs": "EPSG:4326"
-                }
-            ]
         }
     }
 }

@@ -1,0 +1,38 @@
+{
+  "$schema": "../schemas/dynstyle.schema.json",
+  "title": "Parcelles",
+  "cacheKey": "parcelles",
+  "static": {
+    "parcelle-outline": {
+      "stroke": {
+        "color": "rgba(107, 114, 128, 0.9)",
+        "width": 0.5,
+        "lineDash": [4, 3]
+      },
+      "fill": null
+    },
+    "parcelle-label": {
+      "text": {
+        "step": "map",
+        "declutter": "first",
+        "text": "",
+        "font": "10px sans-serif",
+        "fill": {
+          "color": "rgba(75, 85, 99, 0.95)"
+        },
+        "stroke": {
+          "color": "rgba(255, 255, 255, 0.85)",
+          "width": 2
+        },
+        "overflow": true,
+        "placement": "point"
+      }
+    }
+  },
+  "dynamic": [
+    {
+      "pointer": "#/parcelle-label/text/text",
+      "value": "=> String(F.properties?.NUMERO ?? '??')"
+    }
+  ]
+}

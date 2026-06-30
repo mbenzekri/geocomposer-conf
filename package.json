@@ -1,10 +1,16 @@
 {
-    "name": "geo-composer-config",
-    "private": true,
-    "config": {
-        "geocRelease": "https://github.com/mbenzekri/geocomposer/releases/download/v1.0.2"
-    },
-    "scripts": {
-        "postinstall": "curl -fsSL \"$npm_package_config_geocRelease/config.schema.json\" -o config.schema.json && curl -fsSL \"$npm_package_config_geocRelease/dynstyle.schema.json\" -o dynstyle.schema.json"
-    }
+  "name": "geo-composer",
+  "private": true,
+  "scripts": {
+    "validate:json": "node -e \"JSON.parse(require('node:fs').readFileSync('config.json', 'utf8'))\"",
+    "validate:config": "node scripts/validate-config.mjs",
+    "build" : "docker compose build server",
+    "run" : "docker compose run --rm --service-ports server",
+    "up" : "docker compose up -d server",
+    "down" : "docker compose down  server",
+    "rm" : "npm run down; docker compose rm  server"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1"
+  }
 }
